@@ -46,11 +46,22 @@ small {
     font-size:xx-large;
     border-bottom-left-radius: 8px;
     border-bottom-left-radius: 8px;
-    margin-top:-10px;
+    margin-top:-15px;
 }
 
 #footer{
     font-size:smaller;
-    margin-bottom:-10px;
+    bottom:-15px;
+    position : absolute;
+    width:100%;
 }
 
+#form {
+    float:left;
+    margin-right:10px;
+}
+
+#display {
+    float:right;
+    margin-right:10px;
+}

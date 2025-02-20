@@ -66,7 +66,9 @@
     </script>
 </head>
 <body>
-    <h1>Demographics Form</h1>
+    <h1 id="header">Demographics Form</h1>
+
+    <div id="form">
     <form id="demographicsForm" onsubmit="submitDemographic(event)">
         <div class="question">
             <label for="firstName">First Name:</label>
@@ -112,5 +114,10 @@
 
         <button type="submit">Submit</button>
     </form>
+    </div>
+    <div id="display">
+        <p>Display here</p>
+    </div>
+    <p id="footer">Insert copyright info here</p>
 </body>
 </html> 
