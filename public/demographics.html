@@ -12,15 +12,57 @@
         const form = document.getElementById('demographicsForm');
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
-        const response = await fetch('/api/demographics', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        alert(result.message || 'Submitted successfully!'); }
+
+        /*formData.get("firstName")
+        formData.get("lastName")
+        formData.get("age")
+        formData.get("email")
+        formData.get("gender")
+        formData.get("city")
+         */
+
+        if (formData.get("firstName").length < 2) {
+            document.getElementById('fNameError').innerHTML ='&nbsp; 2 characters required';
+            isValid = false;
+        } else {
+            document.getElementById('fNameError').innerHTML ='&nbsp;';
+        }
+
+        if (formData.get("lastName").length < 2) {
+            document.getElementById('lNameError').innerHTML ='&nbsp; 2 characters required';
+            isValid = false;
+        } else {
+            document.getElementById('lNameError').innerHTML ='&nbsp;';
+        }
+
+        const age = formData.get("age");
+        if (age != '' && (age < 0)){
+            document.getElementById("ageError").innerHTML = "&nbsp; If included, age must be a positive number";
+            isValid= false;
+        } else {
+            document.getElementById('ageError').innerHTML = '&nbsp;';
+        }
+
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/; 
+        if (!emailPattern.test(formData.get("email"))) {
+            document.getElementById('emailError').innerHTML ='&nbsp; email required';            
+            isValid = false;
+        } else {
+            document.getElementById('emailError').innerHTML ='&nbsp;';
+        }
+
+        if(isValid){
+            const response = await fetch('/api/demographics', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            alert(result.message || 'Submitted successfully!'); 
+        }
+    }
     </script>
 </head>
 <body>
@@ -28,28 +70,46 @@
     <form id="demographicsForm" onsubmit="submitDemographic(event)">
         <div class="question">
             <label for="firstName">First Name:</label>
-            <input type="text" name="firstName" required>
+            <input type="text" name="firstName" id="firstName" required>
         </div>
+        <small id="fNameError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <div class="question">
             <label for="lastName">Last Name:</label>
-            <input type="text" name="lastName" required>
+            <input type="text" name="lastName" id="firstName" required>
         </div>
+        <small id="lNameError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <div class="question">
             <label for="age">Age:</label>
-            <input type="number" name="age" required>
+            <input type="number" name="age" id="age" required>
         </div>
+        <small id="ageError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <div class="question">
             <label for="email">Email:</label>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email" required>
         </div>
+        <small id="emailError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <div class="question">
             <label for="gender">Gender:</label>
-            <input type="text" name="gender" required>
+            <input type="text" name="gender" id="gender" required>
         </div>
+        <small id="genderError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <div class="question">
             <label for="city">City:</label> 
-            <input type="text" name="city" required>
+            <input type="text" name="city" id="city" required>
         </div>
+        <small id="cityError" style="color: red;">&nbsp;</small>
+        <br><br>
+
         <button type="submit">Submit</button>
     </form>
 </body>
