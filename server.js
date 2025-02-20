@@ -12,6 +12,7 @@ gender TEXT,
 city TEXT )
 `);
 
+//open the server on local port 3000
 const express = require('express'); 
 const app = express(); 
 const PORT = 3000; 
@@ -22,11 +23,13 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`); 
 }); 
 
+//Display basic text on the main location (no specific directory to deomgraphics.html)
 app.get('/', (req, res) => {
   res.send('Hello World! This is my first Node.js web app.');
 });
 
 
+//When POST initiated, run an SQL query to insert the (verified) form data into the demographics table  
 app.post('/api/demographics', (req, res) => {
   const { firstName, lastName, age, email, gender, city } = req.body;
   const query = ` INSERT INTO demographics (firstName, lastName, age, email, gender, city) VALUES (?, ?, ?, ?, ?, ?) `;
@@ -34,7 +37,7 @@ app.post('/api/demographics', (req, res) => {
   });
 });
 
-
+//When run in the console, runs an SQL query to display all data in the demographics table
 app.get('/api/demographics', (req, res) => {
   db.all('SELECT * FROM demographics', (err, rows) => {
   if (err) return res.status(500).json({ error: err.message });
@@ -42,7 +45,7 @@ app.get('/api/demographics', (req, res) => {
   });
 });
 
-
+//When run in the console, updates demographic data for the given ID
 app.put('/api/demographics/:id', (req, res) => {
   const { id } = req.params;
   const { firstName, lastName, age, email, gender, city } = req.body;
@@ -54,7 +57,7 @@ app.put('/api/demographics/:id', (req, res) => {
   });
 });
 
-
+//When run in the console, deletes all data for the given ID
 app.delete('/api/demographics/:id', (req, res) => {
   const { id } = req.params;
   db.run('DELETE FROM demographics WHERE id = ?', id, function (err) {
