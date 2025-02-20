@@ -39,6 +39,7 @@ app.post('/api/demographics', (req, res) => {
 
 //When run in the console, runs an SQL query to display all data in the demographics table
 app.get('/api/demographics', (req, res) => {
+  console.log("get called");
   db.all('SELECT * FROM demographics', (err, rows) => {
   if (err) return res.status(500).json({ error: err.message });
   res.json(rows);

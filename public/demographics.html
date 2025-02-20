@@ -20,7 +20,7 @@
         formData.get("gender")
         formData.get("city")
          */
-
+        isValid = true;
         if (formData.get("firstName").length < 2) {
             document.getElementById('fNameError').innerHTML ='&nbsp; 2 characters required';
             isValid = false;
@@ -61,13 +61,25 @@
             });
             const result = await response.json();
             alert(result.message || 'Submitted successfully!'); 
-        }
+            displayDemographic();
+        } 
     }
+    async function displayDemographic() {
+        const response = await fetch('/api/demographics', {
+            method: 'GET',
+            headers: {
+            'Content-Type': 'application/json'
+            }});
+            const result = await response.json();
+            alert(result.message || 'Displayed successfully!');
+    }
+    
     </script>
 </head>
 <body>
+    <div id="full">
     <h1 id="header">Demographics Form</h1>
-
+    <div id="content">
     <div id="form">
     <form id="demographicsForm" onsubmit="submitDemographic(event)">
         <div class="question">
@@ -118,6 +130,8 @@
     <div id="display">
         <p>Display here</p>
     </div>
+    </div>
     <p id="footer">Insert copyright info here</p>
+    </div>
 </body>
 </html> 
