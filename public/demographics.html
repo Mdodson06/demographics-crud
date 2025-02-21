@@ -8,60 +8,117 @@
     <!--JS called within this html page-->
     <script>
         displayDemographic();
+        function checkDemographic(formData) {
+            var isValid = true;
+            const submissionType = formData.get("types");
+            //Checks for incorrect submission types
+            if (!(submissionType =="insert" || submissionType =="edit" ||submissionType =="delete")){
+                document.getElementById('typeError').innerHTML ='&nbsp; Unknown submission type';
+                return false;
+            } else {
+                document.getElementById('typeError').innerHTML ='&nbsp;';
+            }
+
+            //Handles and returns delete types 
+            if (submissionType=="delete") {
+                if(formData.get("sqlid") == '') {
+                    //NOTE: Does not check if other fields are empty, simply ignores the values if included
+                    document.getElementById('sqlidError').innerHTML ='&nbsp; Only include SQL ID for a delete';
+                    document.getElementById('fNameError').innerHTML ='&nbsp;';
+                    document.getElementById('lNameError').innerHTML ='&nbsp;';
+                    document.getElementById('ageError').innerHTML ='&nbsp;';
+                    document.getElementById('emailError').innerHTML ='&nbsp;';
+                    document.getElementById('genderError').innerHTML ='&nbsp;';
+                    document.getElementById('cityError').innerHTML ='&nbsp;';
+                    return false;
+                }
+                else {
+                    document.getElementById('sqlidError').innerHTML ='&nbsp;';
+                    return true;
+                }
+            }
+            
+            //Handle insert and edit differences
+            if (submissionType=="insert" && formData.get("sqlid") != '') {
+                document.getElementById('sqlidError').innerHTML ='&nbsp; Do not include SQL ID for an insert';
+                isValid = false;
+            } else if (submissionType=="edit" && formData.get("sqlid") == ''){
+                document.getElementById('sqlidError').innerHTML ='&nbsp; Please include SQL ID for an edit';
+                isValid = false;
+            } else {
+                document.getElementById('sqlidError').innerHTML ='&nbsp;';
+            }
+
+            //verifies proper formatting
+            if (formData.get("firstName").length < 2) {
+                document.getElementById('fNameError').innerHTML ='&nbsp; 2 characters required';
+                isValid = false;
+            } else {
+                document.getElementById('fNameError').innerHTML ='&nbsp;';
+            }
+
+            if (formData.get("lastName").length < 2) {
+                document.getElementById('lNameError').innerHTML ='&nbsp; 2 characters required';
+                isValid = false;
+            } else {
+                document.getElementById('lNameError').innerHTML ='&nbsp;';
+            }
+            const age = formData.get("age");
+            if (age == '' || (age < 0)){
+                document.getElementById("ageError").innerHTML = "&nbsp; positive number required";
+                isValid= false;
+            } else {
+                document.getElementById('ageError').innerHTML = '&nbsp;';
+            }
+            const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/; 
+            if (!emailPattern.test(formData.get("email"))) {
+                document.getElementById('emailError').innerHTML ='&nbsp; email required';            
+                isValid = false;
+            } else {
+                document.getElementById('emailError').innerHTML ='&nbsp;';
+            }
+            if (formData.get("gender") == '') {
+                document.getElementById('genderError').innerHTML ='&nbsp; gender required';
+                isValid = false;
+            } else {
+                document.getElementById('genderError').innerHTML ='&nbsp;';
+            }
+            if (formData.get("city") == '') {
+                document.getElementById('cityError').innerHTML ='&nbsp; city required';
+                isValid = false;
+            } else {
+                document.getElementById('cityError').innerHTML ='&nbsp;';
+            }
+
+            return isValid;
+        }
         async function submitDemographic(event) {
         event.preventDefault();
         const form = document.getElementById('demographicsForm');
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
+        const submissionType = formData.get("types");
+        var isValid = checkDemographic(formData);
 
-        /*formData.get("firstName")
-        formData.get("lastName")
-        formData.get("age")
-        formData.get("email")
-        formData.get("gender")
-        formData.get("city")
-         */
-        isValid = true;
-        if (formData.get("firstName").length < 2) {
-            document.getElementById('fNameError').innerHTML ='&nbsp; 2 characters required';
-            isValid = false;
-        } else {
-            document.getElementById('fNameError').innerHTML ='&nbsp;';
-        }
-
-        if (formData.get("lastName").length < 2) {
-            document.getElementById('lNameError').innerHTML ='&nbsp; 2 characters required';
-            isValid = false;
-        } else {
-            document.getElementById('lNameError').innerHTML ='&nbsp;';
-        }
-
-        const age = formData.get("age");
-        if (age != '' && (age < 0)){
-            document.getElementById("ageError").innerHTML = "&nbsp; If included, age must be a positive number";
-            isValid= false;
-        } else {
-            document.getElementById('ageError').innerHTML = '&nbsp;';
-        }
-
-        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/; 
-        if (!emailPattern.test(formData.get("email"))) {
-            document.getElementById('emailError').innerHTML ='&nbsp; email required';            
-            isValid = false;
-        } else {
-            document.getElementById('emailError').innerHTML ='&nbsp;';
-        }
 
         if(isValid){
-            const response = await fetch('/api/demographics', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            alert(result.message || 'Submitted successfully!'); 
+            if(submissionType == "insert") {
+                const response = await fetch('/api/demographics', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message || 'Submitted successfully!'); 
+            } else if(submissionType == "edit") {
+                alert("Edit functionality not yet added");
+            } else if(submissionType == "delete") {
+                alert("Delete functionality not yet added");
+            } else {
+                alert("Unknown functionality: " + submissionType);
+            }
             displayDemographic();
         } 
     }
@@ -81,10 +138,7 @@
                     htmlText += '<th>' + obs[i] + '</th>';
                 }
                 htmlText += '</tr>'
-//Object.values(jsonArray[i]);
                 for (let i = 0; i < jsonArray.length; i++) {
-                    //jsonArray is array version of the json
-                    //jsonArray iterates through each line
                     var row = Object.values(jsonArray[i]);
                     htmlText += '<tr>'
                     for (let j = 0; j < row.length; j++) {
@@ -106,47 +160,63 @@
     <div id="form">
     <form id="demographicsForm" onsubmit="submitDemographic(event)">
         <div class="question">
+            <label for="sqlid">Query ID:</label>
+            <input type="number" name="sqlid" id="sqlid">
+        </div>
+        <small id="sqlidError" style="color: red;">&nbsp;</small>
+        <br><br>
+
+        <div class="question">
             <label for="firstName">First Name:</label>
-            <input type="text" name="firstName" id="firstName" required>
+            <input type="text" name="firstName" id="firstName">
         </div>
         <small id="fNameError" style="color: red;">&nbsp;</small>
         <br><br>
 
         <div class="question">
             <label for="lastName">Last Name:</label>
-            <input type="text" name="lastName" id="firstName" required>
+            <input type="text" name="lastName" id="firstName">
         </div>
         <small id="lNameError" style="color: red;">&nbsp;</small>
         <br><br>
 
         <div class="question">
             <label for="age">Age:</label>
-            <input type="number" name="age" id="age" required>
+            <input type="number" name="age" id="age">
         </div>
         <small id="ageError" style="color: red;">&nbsp;</small>
         <br><br>
 
         <div class="question">
             <label for="email">Email:</label>
-            <input type="email" name="email" id="email" required>
+            <input type="email" name="email" id="email">
         </div>
         <small id="emailError" style="color: red;">&nbsp;</small>
         <br><br>
 
         <div class="question">
             <label for="gender">Gender:</label>
-            <input type="text" name="gender" id="gender" required>
+            <input type="text" name="gender" id="gender">
         </div>
         <small id="genderError" style="color: red;">&nbsp;</small>
         <br><br>
 
         <div class="question">
             <label for="city">City:</label> 
-            <input type="text" name="city" id="city" required>
+            <input type="text" name="city" id="city">
         </div>
         <small id="cityError" style="color: red;">&nbsp;</small>
         <br><br>
-
+        <div class="question">
+            <label for="types">Submission type:</label>
+            <select name="types" id="types" required>
+                <option value="insert">Insert</option>
+                <option value="edit">Edit</option>
+                <option value="delete">Delete</option>
+            </select> 
+        </div>
+        <small id="typeError" style="color: red;">&nbsp;</small>
+        <br><br>
         <button type="submit">Submit</button>
     </form>
     </div>
