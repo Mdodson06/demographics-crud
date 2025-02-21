@@ -1,7 +1,7 @@
 body {
     background-color: #000033;
     color:#e4eaea;
-    width:100%;
+    width:99%;
     height:100vh;
 }
 
@@ -53,8 +53,6 @@ small {
 
 #header {
     font-size:xx-large;
-    border-bottom-left-radius: 8px;
-    border-bottom-left-radius: 8px;
     margin-top:-1%;
 }
 
@@ -71,4 +69,34 @@ small {
     display:flex;
     justify-content: space-around;
     flex-grow:1;
+}
+
+#display {
+    margin-left:5px;
+    margin-right:10px;
+}
+
+table {
+    text-align: left;
+    width:99%;
+    table-layout:fixed;
+}
+
+table,th,td {
+    border-bottom: 2px solid pink;
+    border-collapse: collapse;
+}
+th,td {
+    padding-left:2px;
+    padding-right:10px;
+    table-layout:fixed;
+}
+
+td {
+    text-overflow: ellipsis; 
+    overflow: hidden;
+    white-space: nowrap;
+}
+tr:hover{
+    background-color: #1b1b3d;
 }

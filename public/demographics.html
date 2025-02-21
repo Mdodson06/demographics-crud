@@ -7,6 +7,7 @@
     <title>Demographics Form</title>
     <!--JS called within this html page-->
     <script>
+        displayDemographic();
         async function submitDemographic(event) {
         event.preventDefault();
         const form = document.getElementById('demographicsForm');
@@ -69,9 +70,31 @@
             method: 'GET',
             headers: {
             'Content-Type': 'application/json'
-            }});
-            const result = await response.json();
-            alert(result.message || 'Displayed successfully!');
+            }})
+            .then(response => response.json())
+            .then(json => {
+                //var radr = JSON.stringify(json);
+                const jsonArray = Object.values(json);
+                const obs = Object.keys(jsonArray[0]);
+                var htmlText = '<table> <tr>';
+                for (let i = 0; i < obs.length; i++) {
+                    htmlText += '<th>' + obs[i] + '</th>';
+                }
+                htmlText += '</tr>'
+//Object.values(jsonArray[i]);
+                for (let i = 0; i < jsonArray.length; i++) {
+                    //jsonArray is array version of the json
+                    //jsonArray iterates through each line
+                    var row = Object.values(jsonArray[i]);
+                    htmlText += '<tr>'
+                    for (let j = 0; j < row.length; j++) {
+                        htmlText += '<td>' + row[j] + '</td>';                        
+                    }
+                    htmlText +="</tr>"
+                }
+                htmlText += "</table>"
+                document.getElementById("display").innerHTML = htmlText;
+            });
     }
     
     </script>
@@ -128,7 +151,7 @@
     </form>
     </div>
     <div id="display">
-        <p>Display here</p>
+        <table></table>
     </div>
     </div>
     <p id="footer">Insert copyright info here</p>
