@@ -11,7 +11,7 @@
         function checkDemographic(formData) {
             var isValid = true;
             const submissionType = formData.get("types");
-            //Checks for incorrect submission types
+            //Checks and handles for incorrect submission types -- should not be possible but verification
             if (!(submissionType =="insert" || submissionType =="edit" ||submissionType =="delete")){
                 document.getElementById('typeError').innerHTML ='&nbsp; Unknown submission type';
                 return false;
@@ -38,7 +38,7 @@
                 }
             }
             
-            //Handle insert and edit differences
+            //Handle sql ID difference between inserts and edits
             if (submissionType=="insert" && formData.get("sqlid") != '') {
                 document.getElementById('sqlidError').innerHTML ='&nbsp; Do not include SQL ID for an insert';
                 isValid = false;
@@ -92,45 +92,68 @@
 
             return isValid;
         }
+
+        //called when a form is submitted; calls checkDemographic, and if valid, runs proper SQL calls
         async function submitDemographic(event) {
-        event.preventDefault();
-        const form = document.getElementById('demographicsForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        const submissionType = formData.get("types");
-        var isValid = checkDemographic(formData);
+            event.preventDefault();
+            const form = document.getElementById('demographicsForm');
+            var formData = new FormData(form);
+            
+            //Calls checkDemographic to see if the form is valid; if it is, performs proper submission depending on the CRUD operation called
+            var isValid = checkDemographic(formData);
+            if(isValid){
+                //Prevents server-side errors with unnecessary data
+                const submissionType = formData.get("types");
+                formData.delete("types");
+                const sqlid = formData.get("sqlid");
+                formData.delete("sqlid");
+                const data = Object.fromEntries(formData);
+                if(submissionType == "insert") {
+                    const response = await fetch('/api/demographics', {
+                        method: 'POST',
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    alert(result.message || 'Submitted successfully!'); 
+                } else if(submissionType == "edit") {
+                    const fetchLocation = 'api/demographics/' + sqlid
+                    const response = await fetch(fetchLocation, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    alert(result.message || 'Error: No response from server');
+                    //NOTE: Returns success if there is no entry with the given id
 
-
-        if(isValid){
-            if(submissionType == "insert") {
-                const response = await fetch('/api/demographics', {
-                method: 'POST',
+                } else if(submissionType == "delete") {
+                    const fetchLocation = 'api/demographics/' + sqlid
+                    const response = await fetch(fetchLocation, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    alert(result.message || 'Error: No response from server');
+                    //NOTE: Returns success if there is no entry with the given id
+                } else {
+                    alert("Unknown functionality: " + submissionType);
+                }
+                displayDemographic();
+            } 
+        }
+        //Displays the SQL table
+        async function displayDemographic() {
+            const response = await fetch('/api/demographics', {
+                method: 'GET',
                 headers: {
                 'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                alert(result.message || 'Submitted successfully!'); 
-            } else if(submissionType == "edit") {
-                alert("Edit functionality not yet added");
-            } else if(submissionType == "delete") {
-                alert("Delete functionality not yet added");
-            } else {
-                alert("Unknown functionality: " + submissionType);
-            }
-            displayDemographic();
-        } 
-    }
-    async function displayDemographic() {
-        const response = await fetch('/api/demographics', {
-            method: 'GET',
-            headers: {
-            'Content-Type': 'application/json'
-            }})
+                }})
             .then(response => response.json())
             .then(json => {
-                //var radr = JSON.stringify(json);
                 const jsonArray = Object.values(json);
                 const obs = Object.keys(jsonArray[0]);
                 var htmlText = '<table> <tr>';
@@ -149,9 +172,9 @@
                 htmlText += "</table>"
                 document.getElementById("display").innerHTML = htmlText;
             });
-    }
-    
+        }
     </script>
+<!--END OF JS-->
 </head>
 <body>
     <div id="full">
